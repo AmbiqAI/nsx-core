@@ -9,6 +9,23 @@ support:
   ambiqsuite: true
   zephyr: false
 
+summary: Core runtime initialization and baseline support for most NSX apps.
+
+capabilities:
+  - runtime
+  - startup
+  - application_lifecycle
+
+use_cases:
+  - baseline app bring-up
+  - reusable runtime foundation
+  - most NSX applications
+
+agent_keywords:
+  - core
+  - runtime
+  - app foundation
+
 build:
   cmake:
     package: nsx_core
