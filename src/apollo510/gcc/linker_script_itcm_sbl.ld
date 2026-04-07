@@ -26,7 +26,7 @@ SECTIONS
         . = ALIGN(4);
         _etext = .;
     } > MCU_MRAM
-    
+
     .itcm_text :
     {
         . = ALIGN(4);
@@ -83,7 +83,7 @@ SECTIONS
         *(.ARM.exidx* .gnu.linkonce.armexidx.*)
     } > MCU_MRAM
     __exidx_end = .;
-    
+
     .preinit_array :
     {
         PROVIDE_HIDDEN (__preinit_array_start = .);
@@ -130,7 +130,7 @@ SECTIONS
     } > MCU_TCM
     /* } > STACK */
 
-    .heap (NOLOAD): 
+    .heap (NOLOAD):
     {
         __heap_start__ = .;
         end = __heap_start__;
@@ -166,6 +166,10 @@ SECTIONS
         _ebss = .;
     } > MCU_TCM
 
+    /* Guard: ensure stack + heap + data + bss fit in TCM */
+    ASSERT( _ebss <= ORIGIN(MCU_TCM) + LENGTH(MCU_TCM),
+            "TCM overflow: stack+heap+data+bss exceed 507904 bytes" )
+
     /*--------------------------------------------------------------------------
      * Uninitialized data in Shared SRAM
      * Place with __attribute__((section(".sram_bss")))
@@ -189,10 +193,11 @@ SECTIONS
 
         _ssdata = .;
         KEEP(*(.shared))
+        *(.shared*)
         . = ALIGN(4);
         _sedata = .;
     } > SHARED_SRAM AT>MCU_MRAM
     _init_data_sram = LOADADDR(.shared);
-    
+
     .ARM.attributes 0 : { *(.ARM.attributes) }
 }

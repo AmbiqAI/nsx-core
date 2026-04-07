@@ -41,7 +41,30 @@ SECTIONS
         *(.ARM.exidx* .gnu.linkonce.armexidx.*)
     } > MCU_MRAM
     __exidx_end = .;
-    
+
+    .preinit_array :
+    {
+        PROVIDE_HIDDEN (__preinit_array_start = .);
+        KEEP (*(.preinit_array*))
+        PROVIDE_HIDDEN (__preinit_array_end = .);
+    } > MCU_MRAM
+
+    .init_array :
+    {
+        PROVIDE_HIDDEN (__init_array_start = .);
+        KEEP (*(SORT(.init_array.*)))
+        KEEP (*(.init_array*))
+        PROVIDE_HIDDEN (__init_array_end = .);
+    } > MCU_MRAM
+
+    .fini_array :
+    {
+        PROVIDE_HIDDEN (__fini_array_start = .);
+        KEEP (*(SORT(.fini_array.*)))
+        KEEP (*(.fini_array*))
+        PROVIDE_HIDDEN (__fini_array_end = .);
+    } > MCU_MRAM
+
     .itcm_text :
     {
         . = ALIGN(4);
@@ -65,7 +88,7 @@ SECTIONS
     } > MCU_TCM
     /* } > STACK */
 
-    .heap (NOLOAD): 
+    .heap (NOLOAD):
     {
         __heap_start__ = .;
         end = __heap_start__;
@@ -101,6 +124,24 @@ SECTIONS
         _ebss = .;
     } > MCU_TCM
 
+    /* Guard: ensure stack + heap + data + bss fit in TCM */
+    ASSERT( _ebss <= ORIGIN(MCU_TCM) + LENGTH(MCU_TCM),
+            "TCM overflow: stack+heap+data+bss exceed 507904 bytes" )
+
+    /*--------------------------------------------------------------------------
+     * Uninitialized data in Shared SRAM
+     * Place with __attribute__((section(".sram_bss")))
+     *--------------------------------------------------------------------------*/
+    .sram_bss (NOLOAD):
+    {
+        . = ALIGN(4);
+        _ssram_bss = .;
+        *(.sram_bss)
+        *(.sram_bss*)
+        . = ALIGN(4);
+        _esram_bss = .;
+    } > SHARED_SRAM
+
     .shared :
     {
         . = ALIGN(4);
@@ -109,10 +150,11 @@ SECTIONS
 
         _ssdata = .;
         KEEP(*(.shared))
+        *(.shared*)
         . = ALIGN(4);
         _sedata = .;
     } > SHARED_SRAM AT>MCU_MRAM
     _init_data_sram = LOADADDR(.shared);
-    
+
     .ARM.attributes 0 : { *(.ARM.attributes) }
 }
