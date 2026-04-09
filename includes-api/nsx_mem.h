@@ -43,7 +43,7 @@
  *        `static NSX_MEM_SRAM_BSS uint8_t buf[1024];`
  *
  * @note  For SRAM placements to work at runtime, shared SRAM must be
- *        powered on. If using ns_power_config(), ensure bNeedSharedSRAM
+ *        powered on. If using ns_power_config(), ensure need_ssram
  *        is true.
  *
  * @copyright Copyright (c) 2024-2026, Ambiq Micro, Inc.
