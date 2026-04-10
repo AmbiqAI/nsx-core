@@ -21,6 +21,7 @@ extern "C" {
     #include <stdint.h>
     #include <string.h>
 
+    #include "nsx_compiler.h"
     #include "am_bsp.h"
     #include "am_mcu_apollo.h"
     #include "am_util.h"
@@ -72,11 +73,7 @@ extern const ns_core_api_t ns_core_current_version;
         }
 
 #if defined(AM_PART_APOLLO5B) || defined(AM_PART_APOLLO4L) || defined(AM_PART_APOLLO4P) || defined(AM_PART_APOLLO510L) || defined(AM_PART_APOLLO330P)
-  #if defined(gcc)
-    #define NS_SRAM_BSS __attribute__((section(".sram_bss")))
-  #else
-    #define NS_SRAM_BSS AM_SHARED_RW
-  #endif
+  #define NS_SRAM_BSS NSX_SECTION(".sram_bss")
 #else
   #define NS_SRAM_BSS
 #endif

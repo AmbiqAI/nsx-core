@@ -33,7 +33,7 @@ LR_1 0x00410000
     ;The next line is a temporary workaround while FPGA doesn't have SSRAM. The above line is actually correct (replace dollar with the dollar sign)
     SHARED_SRAM 0x20080000 0x00300000
     {
-        * (RESOURCE_TABLE, +First)
+        * (RESOURCE_TABLE)
         * (SHARED_RW)
     }
 

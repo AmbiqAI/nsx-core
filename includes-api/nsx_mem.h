@@ -51,22 +51,13 @@
 #ifndef NSX_MEM_H
 #define NSX_MEM_H
 
+#include "nsx_compiler.h"
+
 /* ===================================================================
- * Compiler detection
+ * Compiler-portable helpers (delegated to nsx_compiler.h)
  * =================================================================== */
-#if defined(__GNUC__) && !defined(__ARMCC_VERSION)
-  #define NSX_MEM__SEC(s)   __attribute__((section(s)))
-  #define NSX_MEM__USED     __attribute__((used))
-#elif defined(__ARMCC_VERSION) /* Keil / armclang */
-  #define NSX_MEM__SEC(s)   __attribute__((section(s))) __attribute__((used))
-  #define NSX_MEM__USED     __attribute__((used))
-#elif defined(__IAR_SYSTEMS_ICC__)
-  #define NSX_MEM__SEC(s)   __attribute__((section(s))) __root
-  #define NSX_MEM__USED     __root
-#else
-  #define NSX_MEM__SEC(s)
-  #define NSX_MEM__USED
-#endif
+#define NSX_MEM__SEC(s)   NSX_SECTION(s)
+#define NSX_MEM__USED     NSX_USED
 
 /* ===================================================================
  * Per-SoC memory section mapping

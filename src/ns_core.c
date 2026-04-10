@@ -9,7 +9,7 @@
  *
  */
 #include "ns_core.h"
-#ifdef gcc
+#if NSX_HAS_NEWLIB
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
@@ -145,6 +145,12 @@ void am_gpio0_203f_isr(void) {
 }
 #endif
 
+/* ---------------------------------------------------------------
+ * Newlib __wrap_* retarget stubs (GCC only).
+ * armclang uses its own retarget mechanism via __stdout/__stdin.
+ * --------------------------------------------------------------- */
+#if NSX_HAS_NEWLIB
+
 int __wrap__write_r(struct _reent *r, int fd, const void *ptr, size_t len) {
     // For example, write each byte to UART here.
     // If fd is STDOUT_FILENO or STDERR_FILENO, you might send it to a debug console.
@@ -199,3 +205,5 @@ int __wrap__fstat_r(struct _reent *r, int fd, struct stat *st) {
     // Otherwise, return an error.
     return 0;  // Or an appropriate value.
 }
+
+#endif /* NSX_HAS_NEWLIB */
