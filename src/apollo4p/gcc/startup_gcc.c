@@ -403,12 +403,12 @@ void Reset_Handler(void) {
          "        blt     zero_sram_loop\n");         
           
     // Call CPP constructor init
-    __libc_init_array();
+    __asm("    bl      __libc_init_array\n");
 
     //
     // Call the application's entry point.
     //
-    main();
+    __asm("    bl      main\n");
 
     //
     // If main returns then execute a break point instruction

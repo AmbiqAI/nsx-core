@@ -40,31 +40,41 @@
  * =================================================================== */
 #if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6000000)
   #define NSX_COMPILER_ARMCLANG  1
+  #define NSX_COMPILER_CLANG     0
+  #define NSX_COMPILER_GCC       0
+  #define NSX_COMPILER_IAR       0
+#elif defined(__clang__) && !defined(__ARMCC_VERSION)
+  /* ATfE / upstream LLVM clang — GCC-compatible attributes, newlib C library */
+  #define NSX_COMPILER_CLANG     1
+  #define NSX_COMPILER_ARMCLANG  0
   #define NSX_COMPILER_GCC       0
   #define NSX_COMPILER_IAR       0
 #elif defined(__GNUC__)
   #define NSX_COMPILER_GCC       1
   #define NSX_COMPILER_ARMCLANG  0
+  #define NSX_COMPILER_CLANG     0
   #define NSX_COMPILER_IAR       0
 #elif defined(__IAR_SYSTEMS_ICC__)
   #define NSX_COMPILER_IAR       1
   #define NSX_COMPILER_GCC       0
   #define NSX_COMPILER_ARMCLANG  0
+  #define NSX_COMPILER_CLANG     0
 #else
   #define NSX_COMPILER_GCC       0
   #define NSX_COMPILER_ARMCLANG  0
+  #define NSX_COMPILER_CLANG     0
   #define NSX_COMPILER_IAR       0
 #endif
 
 /* ===================================================================
- * Attribute macros — portable across GCC, armclang, IAR
+ * Attribute macros — portable across GCC, clang, armclang, IAR
  * =================================================================== */
 
 /**
  * @brief Place a variable or function in a named linker section.
  * @param s  Section name string, e.g. ".shared", ".itcm_text"
  */
-#if NSX_COMPILER_GCC || NSX_COMPILER_ARMCLANG
+#if NSX_COMPILER_GCC || NSX_COMPILER_CLANG || NSX_COMPILER_ARMCLANG
   #define NSX_SECTION(s)    __attribute__((section(s)))
 #elif NSX_COMPILER_IAR
   #define NSX_SECTION(s)    @ s
@@ -73,7 +83,7 @@
 #endif
 
 /** @brief Prevent the linker from discarding an otherwise-unreferenced symbol. */
-#if NSX_COMPILER_GCC || NSX_COMPILER_ARMCLANG
+#if NSX_COMPILER_GCC || NSX_COMPILER_CLANG || NSX_COMPILER_ARMCLANG
   #define NSX_USED          __attribute__((used))
 #elif NSX_COMPILER_IAR
   #define NSX_USED          __root
@@ -82,7 +92,7 @@
 #endif
 
 /** @brief Declare a symbol as weak (overridable by a strong definition). */
-#if NSX_COMPILER_GCC || NSX_COMPILER_ARMCLANG
+#if NSX_COMPILER_GCC || NSX_COMPILER_CLANG || NSX_COMPILER_ARMCLANG
   #define NSX_WEAK          __attribute__((weak))
 #elif NSX_COMPILER_IAR
   #define NSX_WEAK          __weak
@@ -91,7 +101,7 @@
 #endif
 
 /** @brief Align to *n* bytes. */
-#if NSX_COMPILER_GCC || NSX_COMPILER_ARMCLANG
+#if NSX_COMPILER_GCC || NSX_COMPILER_CLANG || NSX_COMPILER_ARMCLANG
   #define NSX_ALIGNED(n)    __attribute__((aligned(n)))
 #elif NSX_COMPILER_IAR
   #define NSX_ALIGNED(n)    _Pragma("data_alignment=" #n)
@@ -100,7 +110,7 @@
 #endif
 
 /** @brief Mark a function as never returning. */
-#if NSX_COMPILER_GCC || NSX_COMPILER_ARMCLANG
+#if NSX_COMPILER_GCC || NSX_COMPILER_CLANG || NSX_COMPILER_ARMCLANG
   #define NSX_NORETURN      __attribute__((noreturn))
 #elif NSX_COMPILER_IAR
   #define NSX_NORETURN      __noreturn
@@ -109,7 +119,7 @@
 #endif
 
 /** @brief Prevent inlining of a function. */
-#if NSX_COMPILER_GCC || NSX_COMPILER_ARMCLANG
+#if NSX_COMPILER_GCC || NSX_COMPILER_CLANG || NSX_COMPILER_ARMCLANG
   #define NSX_NOINLINE      __attribute__((noinline))
 #elif NSX_COMPILER_IAR
   #define NSX_NOINLINE      _Pragma("optimize=no_inline")
@@ -118,7 +128,7 @@
 #endif
 
 /** @brief Force inlining of a function. */
-#if NSX_COMPILER_GCC || NSX_COMPILER_ARMCLANG
+#if NSX_COMPILER_GCC || NSX_COMPILER_CLANG || NSX_COMPILER_ARMCLANG
   #define NSX_ALWAYS_INLINE __attribute__((always_inline)) inline
 #elif NSX_COMPILER_IAR
   #define NSX_ALWAYS_INLINE _Pragma("inline=forced")
@@ -137,7 +147,7 @@
  *   } NSX_PACKED_ATTR my_pkt_t;
  *   NSX_PACKED_END
  * ------------------------------------------------------------------- */
-#if NSX_COMPILER_GCC || NSX_COMPILER_ARMCLANG
+#if NSX_COMPILER_GCC || NSX_COMPILER_CLANG || NSX_COMPILER_ARMCLANG
   #define NSX_PACKED_ATTR   __attribute__((packed))
   #define NSX_PACKED_BEGIN
   #define NSX_PACKED_END
@@ -154,10 +164,10 @@
 /* ===================================================================
  * Newlib / retarget detection
  *
- * GCC bare-metal targets use newlib and need __wrap_* stubs.
+ * GCC and ATfE (clang with newlib overlay) need __wrap_* stubs.
  * armclang uses its own retarget mechanism.
  * =================================================================== */
-#if NSX_COMPILER_GCC
+#if NSX_COMPILER_GCC || NSX_COMPILER_CLANG
   #define NSX_HAS_NEWLIB   1
 #else
   #define NSX_HAS_NEWLIB   0

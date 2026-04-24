@@ -430,8 +430,9 @@ Reset_Handler(void)
     //
     // Set the stack limits
     //
-    __set_MSPLIM(AM_STACK_LIMIT);
-    __set_PSPLIM(AM_STACK_LIMIT);
+    __asm("    ldr    r0, =g_pui32Stack\n"
+          "    msr    msplim, r0\n"
+          "    msr    psplim, r0\n");
 
     //
     // Copy the data segment initializers from flash to SRAM.
@@ -472,7 +473,7 @@ Reset_Handler(void)
     //
     // Call the application's entry point.
     //
-    main();
+    __asm("    bl      main\n");
 
     //
     // If main returns then execute a break point instruction
