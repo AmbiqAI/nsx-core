@@ -60,4 +60,25 @@ NSX_MEM_FAST_CODE void hot_isr(void) { ... }         // ITCM (AP510) / TCM (AP3P
 
 Macros degrade gracefully on simpler SoCs (fall back to default sections).
 
+## Toolchains
+
+`nsx-core` is built and validated under three toolchains:
+
+| Toolchain | Notes |
+|---|---|
+| `arm-none-eabi-gcc` (GCC 14.3+) | Reference toolchain |
+| `armclang` (Arm Compiler 6.24+) | Uses `startup_keil6.c` + scatter file |
+| `clang` / ATfE (Arm Toolchain for Embedded 22.1+) | GCC-compatible front-end |
+
+Compiler detection lives in `includes-api/nsx_compiler.h` — it normalizes
+intrinsics, attributes, and inline-assembly differences between the three
+toolchains so consumers don't need their own ifdef ladders.
+
+## Dependencies
+
+- `nsx-cmsis-core` — CMSIS-6 core headers used by `nsx_system.c` and the
+  per-SoC platform backends.
+- An SDK provider (`nsx-ambiqsuite-r3/r4/r5`) — for `am_hal_*` and the system
+  init source.
+
 This repo is CMake-first. Legacy Make integration files are intentionally omitted.
