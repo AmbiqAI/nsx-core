@@ -132,8 +132,9 @@ uint32_t nsx_platform_spot_mgr_profile(void) {
  *     TPIU + ITM + SWO pin + printf. Trace clock = XTAL_HS 48 MHz.
  *   - Apollo510/5B/5A: Manual TPIU config with HFRC_96MHz because
  *     MCUCTRL_DBGCTRL_DBGTPIUCLKSEL is only available on these parts.
- *     BSP SWO pin global (g_AM_BSP_GPIO_ITM_SWO) is in BSS (zero)
- *     until BSP runs, so we configure GPIO 28 manually.
+ *     SWO pin (GPIO 28) is configured via the BSP-supplied
+ *     g_AM_BSP_GPIO_ITM_SWO pincfg (defined in libam_bsp.a's .data,
+ *     so it is valid before any BSP entrypoint runs).
  *
  * The JLink SWO viewer must be told the *trace clock* frequency
  * (not CPU clock) via -cpufreq so that its ACPR override matches.
@@ -173,12 +174,11 @@ uint32_t nsx_platform_debug_init(const nsx_debug_config_t *cfg) {
             _VAL2FLD(ITM_TCR_SYNCENA, 1) |
             _VAL2FLD(ITM_TCR_ITMENA, 1);
 
-        am_hal_gpio_pincfg_t swo_cfg = {0};
-        swo_cfg.GP.cfg_b.uFuncSel      = 0;  /* SWO function */
-        swo_cfg.GP.cfg_b.eGPOutCfg     = 1;  /* push-pull */
-        swo_cfg.GP.cfg_b.eDriveStrength = 1;  /* 0.5x */
-        swo_cfg.GP.cfg_b.eForceOutputEn = 1;
-        am_hal_gpio_pinconfig(AM_BSP_GPIO_ITM_SWO, swo_cfg);
+        /* Use the BSP-supplied SWO pincfg (correct funcsel for AP510 GPIO 28).
+         * The previous code constructed a pincfg with uFuncSel=0, which is
+         * the GPIO function — not SWO — so SWO output never reached the pin
+         * even though TPIU/ITM were configured correctly. */
+        am_hal_gpio_pinconfig(AM_BSP_GPIO_ITM_SWO, g_AM_BSP_GPIO_ITM_SWO);
 
         am_util_stdio_printf_init((am_util_stdio_print_char_t)am_hal_itm_print);
 #endif
