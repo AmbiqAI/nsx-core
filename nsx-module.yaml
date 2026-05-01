@@ -1,46 +1,37 @@
 schema_version: 1
-
 module:
   name: nsx-core
   type: runtime
-  version: "0.1.0"
-
+  version: 0.1.1
 support:
   ambiqsuite: true
   zephyr: false
-
 summary: Core runtime initialization and baseline support for most NSX apps.
-
 capabilities:
   - runtime
   - startup
   - application_lifecycle
-
 use_cases:
   - baseline app bring-up
   - reusable runtime foundation
   - most NSX applications
-
 agent_keywords:
   - core
   - runtime
   - app foundation
-
 build:
   cmake:
     package: nsx_core
     targets:
       - nsx::core
       - nsx::runtime_core
-
 depends:
   required:
     - nsx-soc-hal
   optional: []
-
 compatibility:
   boards:
-    - "*"
+    - '*'
   socs:
     - apollo3
     - apollo3p
@@ -53,5 +44,4 @@ compatibility:
   toolchains:
     - arm-none-eabi-gcc
     - armclang
-
     - atfe
